@@ -782,7 +782,12 @@ public abstract class SlidingPanelLayout extends ViewGroup {
                 final float ady = Math.abs(y - mInitialMotionY);
                 final int slop = mDragHelper.getTouchSlop();
 
-                //强制拦截拦截触摸事件当: 触摸事件在屏幕边缘时
+                //如果 move 事件在 x 轴没有产生位移则返回不拦截
+                if (adx == 0f) {
+                    return false;
+                }
+
+                //强制拦截触摸事件当: 触摸事件在屏幕边缘时
                 if (adx > 0 && adx > ady && mCanSlide && x < mScreenWidth * mForceSlideRegionFactor) {
                     interceptTap = true;
                     break;
