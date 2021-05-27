@@ -83,11 +83,11 @@ public abstract class AbsSlideBackActivity extends AppCompatActivity implements 
         if (mSlideExtraListener != null) {
             mSlideExtraListener.onPanelSlide(panel, slideOffset);
         }
-        //实时设置上一个 activity 的位置
+        //实时设置上一个 activity 的位置(可以自定义, 建议和 activity 的转场动画保持一致)
         int displayWidth = getResources().getDisplayMetrics().widthPixels;
         float totalOffset = displayWidth * 0.25f;
         float offset = (slideOffset * totalOffset) - totalOffset;
-        setPreDecorPosition(offset);
+        setPreActivityPosition(offset);
     }
 
     /**
@@ -101,7 +101,7 @@ public abstract class AbsSlideBackActivity extends AppCompatActivity implements 
         if (mSlideExtraListener != null) {
             mSlideExtraListener.onPanelOpened(panel);
         }
-        setPreDecorPosition(0f);
+        setPreActivityPosition(0f);
         finish();
         overridePendingTransition(0, 0);
     }
@@ -117,13 +117,13 @@ public abstract class AbsSlideBackActivity extends AppCompatActivity implements 
         if (mSlideExtraListener != null) {
             mSlideExtraListener.onPanelClosed(panel);
         }
-        setPreDecorPosition(0f);
+        setPreActivityPosition(0f);
     }
 
     /**
      * 设置上一个界面的位置
      */
-    private void setPreDecorPosition(float offset) {
+    private void setPreActivityPosition(float offset) {
         Activity preActivity = findPreActivity();
         if (preActivity != null) {
             View decorView = preActivity.getWindow().getDecorView();

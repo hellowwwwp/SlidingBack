@@ -17,6 +17,7 @@ class Slide3Activity : AbsSlideBackActivity() {
         setContentView(R.layout.activity_slide3)
         findViewById<TextView>(R.id.tv_title).text = "ViewPager场景"
 
+        //ViewPager 和 ViewPager2 都已测试通过
         val viewPager2 = findViewById<ViewPager2>(R.id.view_pager)
         viewPager2.adapter = MyAdapter()
     }

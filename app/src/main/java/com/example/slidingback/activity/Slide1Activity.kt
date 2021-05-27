@@ -21,6 +21,7 @@ class Slide1Activity : AbsSlideBackActivity() {
     }
 
     override fun isSlideBackEnabled(): Boolean {
+        //task root 的情况下默认不允许侧滑返回
         return true
     }
 

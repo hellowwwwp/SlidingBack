@@ -41,6 +41,7 @@ class Slide2Activity : AbsSlideBackActivity() {
 
         handler.post(runnable)
 
+        //业务层控制侧滑开关
         setSlideInterceptor { count >= 3 }
     }
 

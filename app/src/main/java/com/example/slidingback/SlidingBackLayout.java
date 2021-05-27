@@ -90,12 +90,6 @@ public class SlidingBackLayout extends SlidingPanelLayout implements Translucent
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        final int action = ev.getActionMasked();
-//        if (action == MotionEvent.ACTION_DOWN && mSlideOffset != 0f) {
-//            //侧滑面板已经有滑动了,放弃新来的触摸事件序列
-//            return false;
-//        }
-
         if (ev.getPointerCount() > 1) {
             return false;
         }
