@@ -2,7 +2,6 @@ package com.example.slidingback.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.TextView
 import com.example.slidingback.AbsSlideBackActivity
 import com.example.slidingback.R
@@ -19,26 +18,10 @@ class Slide1Activity : AbsSlideBackActivity() {
                 startActivity(Intent(this@Slide1Activity, Slide2Activity::class.java))
             }
         }
-        Log.e("tag", "Slide1Activity onCreate")
     }
 
     override fun isSlideBackEnabled(): Boolean {
         return true
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.e("tag", "Slide1Activity onStart")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.e("tag", "Slide1Activity onStop")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.e("tag", "Slide1Activity onDestroy")
     }
 
 }

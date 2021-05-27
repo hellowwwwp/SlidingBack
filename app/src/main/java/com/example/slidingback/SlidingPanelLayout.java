@@ -133,6 +133,11 @@ public abstract class SlidingPanelLayout extends ViewGroup {
     private final float mScreenWidth;
 
     /**
+     * 是否在退出
+     */
+    private boolean mHasExit;
+
+    /**
      * 限制滑动范围占屏幕的比例
      */
     private float mSlideRegionFactor = 0.25f;
@@ -221,6 +226,14 @@ public abstract class SlidingPanelLayout extends ViewGroup {
     public abstract void convertToTranslucent();
 
     public abstract void convertFromTranslucent();
+
+    public boolean isHasExit() {
+        return mHasExit;
+    }
+
+    public void setHasExit(boolean hasExit) {
+        mHasExit = hasExit;
+    }
 
     public float getSlideRegionFactor() {
         return mSlideRegionFactor;
@@ -312,10 +325,6 @@ public abstract class SlidingPanelLayout extends ViewGroup {
         if (listener != null) {
             mPanelSlideListeners.remove(listener);
         }
-    }
-
-    public void removeAllPanelSlideListeners() {
-        mPanelSlideListeners.clear();
     }
 
     void dispatchOnPanelSlide(View panel) {
@@ -716,6 +725,11 @@ public abstract class SlidingPanelLayout extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        //如果已经在退出了就直接吃掉这轮触摸事件序列
+        if (mHasExit) {
+            return true;
+        }
+
         final int action = ev.getActionMasked();
 
         // Preserve the open state based on the last view that was touched.
@@ -800,9 +814,10 @@ public abstract class SlidingPanelLayout extends ViewGroup {
             return super.onTouchEvent(ev);
         }
 
-        mDragHelper.processTouchEvent(ev);
-
-        boolean wantTouchEvents = true;
+        //如果已经在退出了就直接吃掉这轮触摸事件序列
+        if (mHasExit) {
+            return true;
+        }
 
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
@@ -820,8 +835,7 @@ public abstract class SlidingPanelLayout extends ViewGroup {
                     final float dx = x - mInitialMotionX;
                     final float dy = y - mInitialMotionY;
                     final int slop = mDragHelper.getTouchSlop();
-                    if (dx * dx + dy * dy < slop * slop
-                            && mDragHelper.isViewUnder(mSlideableView, (int) x, (int) y)) {
+                    if (dx * dx + dy * dy < slop * slop && mDragHelper.isViewUnder(mSlideableView, (int) x, (int) y)) {
                         // Taps close a dimmed open pane.
                         closePane(0);
                         break;
@@ -829,9 +843,18 @@ public abstract class SlidingPanelLayout extends ViewGroup {
                 }
                 break;
             }
+
+            case MotionEvent.ACTION_MOVE: {
+                if (Math.abs(ev.getY() - mInitialMotionY) > Math.abs(ev.getX() - mInitialMotionX)) {
+                    return true;
+                }
+                break;
+            }
         }
 
-        return wantTouchEvents;
+        mDragHelper.processTouchEvent(ev);
+
+        return true;
     }
 
     private boolean closePane(int initialVelocity) {
@@ -1257,6 +1280,7 @@ public abstract class SlidingPanelLayout extends ViewGroup {
             int left = getPaddingLeft() + lp.leftMargin;
             if (xvel > 0 || (xvel == 0 && mSlideOffset > 0.5f)) {
                 left += mSlideRange;
+                mHasExit = true;
             }
 
             mDragHelper.settleCapturedViewAt(left, releasedChild.getTop());

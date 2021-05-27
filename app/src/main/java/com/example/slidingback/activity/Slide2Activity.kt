@@ -3,7 +3,6 @@ package com.example.slidingback.activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.widget.TextView
 import com.example.slidingback.AbsSlideBackActivity
 import com.example.slidingback.R
@@ -39,7 +38,6 @@ class Slide2Activity : AbsSlideBackActivity() {
                 startActivity(Intent(this@Slide2Activity, Slide3Activity::class.java))
             }
         }
-        Log.e("tag", "Slide2Activity onCreate")
 
         handler.post(runnable)
 
@@ -50,20 +48,9 @@ class Slide2Activity : AbsSlideBackActivity() {
         return true
     }
 
-    override fun onStart() {
-        super.onStart()
-        Log.e("tag", "Slide2Activity onStart")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.e("tag", "Slide2Activity onStop")
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(runnable)
-        Log.e("tag", "Slide2Activity onDestroy")
     }
 
 }

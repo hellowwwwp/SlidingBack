@@ -1,7 +1,6 @@
 package com.example.slidingback.activity
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +16,6 @@ class Slide3Activity : AbsSlideBackActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_slide3)
         findViewById<TextView>(R.id.tv_title).text = "ViewPager场景"
-        Log.e("tag", "Slide3Activity onCreate")
 
         val viewPager2 = findViewById<ViewPager2>(R.id.view_pager)
         viewPager2.adapter = MyAdapter()
@@ -45,21 +43,6 @@ class Slide3Activity : AbsSlideBackActivity() {
 
     override fun isSlideBackEnabled(): Boolean {
         return true
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.e("tag", "Slide3Activity onStart")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.e("tag", "Slide3Activity onStop")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.e("tag", "Slide3Activity onDestroy")
     }
 
 }

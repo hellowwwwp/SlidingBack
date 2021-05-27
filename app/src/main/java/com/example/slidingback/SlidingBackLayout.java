@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.lang.ref.WeakReference;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
@@ -17,16 +20,12 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.math.MathUtils;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleEventObserver;
-import androidx.lifecycle.LifecycleOwner;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
-public class SlidingBackLayout extends SlidingPanelLayout implements TranslucentConversionListener,
-        SlidingPanelLayout.PanelSlideListener, LifecycleEventObserver {
+public class SlidingBackLayout extends SlidingPanelLayout implements TranslucentConversionListener, SlidingPanelLayout.PanelSlideListener {
 
-    private Activity mActivity;
+    private WeakReference<Activity> mActivityRefs;
 
     /**
      * 侧滑拦截器, 允许上层随时拦截
@@ -59,6 +58,7 @@ public class SlidingBackLayout extends SlidingPanelLayout implements Translucent
     public SlidingBackLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mMaskView = new View(context);
+        mMaskView.setClickable(true);
     }
 
     public void setMaskColor(@ColorInt int maskColor) {
@@ -90,6 +90,12 @@ public class SlidingBackLayout extends SlidingPanelLayout implements Translucent
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+//        final int action = ev.getActionMasked();
+//        if (action == MotionEvent.ACTION_DOWN && mSlideOffset != 0f) {
+//            //侧滑面板已经有滑动了,放弃新来的触摸事件序列
+//            return false;
+//        }
+
         if (ev.getPointerCount() > 1) {
             return false;
         }
@@ -107,12 +113,18 @@ public class SlidingBackLayout extends SlidingPanelLayout implements Translucent
         return super.onTouchEvent(ev);
     }
 
-    public void attachToActivity(@NonNull FragmentActivity activity) {
-        this.mActivity = activity;
-        activity.getLifecycle().addObserver(this);
-        //设置 activity 背景为透明
-        activity.getWindow().getDecorView().setBackgroundColor(Color.TRANSPARENT);
+    public void attachToActivity(@NonNull Activity activity) {
+        this.mActivityRefs = new WeakReference<>(activity);
         attachSlideView(activity.findViewById(android.R.id.content));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && activity.getWindow() != null) {
+            //设置 activity 背景为透明
+            activity.getWindow().getDecorView().setBackgroundColor(Color.TRANSPARENT);
+            //不强制 activity 透明就把 activity 转为不透明
+            if (!isForceActivityTransparent) {
+                convertFromTranslucent();
+            }
+        }
     }
 
     private void attachSlideView(@NonNull View contentView) {
@@ -133,18 +145,13 @@ public class SlidingBackLayout extends SlidingPanelLayout implements Translucent
         //重新将侧滑面板加入到之前的 ViewGroup 中
         parent.addView(this, contentView.getLayoutParams());
 
-        //添加侧滑监听
-        addPanelSlideListener(this);
-
         //如果之前的 contentView 有焦点那就让它重新获取
         if (isFocused) {
             requestFocus();
         }
 
-        //不强制 activity 透明就把 activity 转为不透明
-        if (!isForceActivityTransparent) {
-            convertFromTranslucent();
-        }
+        //添加侧滑监听
+        addPanelSlideListener(this);
     }
 
     /**
@@ -175,22 +182,18 @@ public class SlidingBackLayout extends SlidingPanelLayout implements Translucent
         }
     }
 
-    @Override
-    public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
-        if (event == Lifecycle.Event.ON_DESTROY) {
-            source.getLifecycle().removeObserver(this);
-            onActivityDestroy();
+    @Nullable
+    private Activity getActivity() {
+        WeakReference<Activity> activityRefs = mActivityRefs;
+        if (activityRefs != null) {
+            return activityRefs.get();
         }
-    }
-
-    public void onActivityDestroy() {
-        mActivity = null;
-        removeAllPanelSlideListeners();
+        return null;
     }
 
     @Override
     public void convertToTranslucent() {
-        final Activity activity = mActivity;
+        final Activity activity = getActivity();
         if (activity != null) {
             ActivityHelper.convertToTranslucent(activity, this);
         }
@@ -198,7 +201,7 @@ public class SlidingBackLayout extends SlidingPanelLayout implements Translucent
 
     @Override
     public void convertFromTranslucent() {
-        final Activity activity = mActivity;
+        final Activity activity = getActivity();
         if (activity != null) {
             ActivityHelper.convertFromTranslucent(activity, this);
         }
